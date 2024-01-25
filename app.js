@@ -1,26 +1,15 @@
-import Express  from "express"
-import ProductManager from "./src/classes/productManager.js"
+import Express, { urlencoded }  from "express"
+import routerProds from "./src/routes/product.routes.js"
+import routerCart from "./src/routes/cart.routes.js"
+
 const app = Express()
-const prod = new ProductManager()
 
+app.use(Express.json)
+app.use(urlencoded({extended:true}))
 
-app.get("/products",  async (req, res )=>{
-    const prods = await prod.getProducts()
-   res.json(prods)
-})
+app.use('/api/products' , routerProds)
+app.use('/api/carts' , routerCart)
 
-app.get("/products/:id" , async (req,res)=>{
-    const {id} = req.params
-
-    const product = await prod.getProductById(parseInt(id))
-
-    if (!product){
-        res.send({error: "el producto no se encuentra"})
-    }
-    else{
-        res.json(product)
-    }
-})
-app.listen(1234 , ()=>{
-    console.log("Server run on port 1234")
+app.listen(8080 , ()=>{
+    console.log("Server run on port 8080 | http://localhost:8080/api/products")
 })

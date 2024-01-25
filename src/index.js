@@ -1,8 +1,10 @@
 import ProductManager from "./classes/productManager.js";
 
+
+
 const prodManager = new ProductManager()
 
-prodManager.addProduct({
+const prod1 = await prodManager.addProduct({
     tittle:"iphone",
     description:"white",
     price:800,
@@ -11,7 +13,7 @@ prodManager.addProduct({
     stock: 21,
 }
 )
-prodManager.addProduct({
+const prod2 = await prodManager.addProduct({
     tittle:"iphone",
     description:"black",
     price:800,
@@ -20,7 +22,7 @@ prodManager.addProduct({
     stock: 21,
 }
 )
-prodManager.addProduct({
+const prod3 = await prodManager.addProduct({
     tittle:"iphone 13 ",
     description:"black",
     price:800,
@@ -30,13 +32,4 @@ prodManager.addProduct({
 }
 )
 
-prodManager.updateProduct({
-    tittle:"iphone 13 ",
-    description:"black",
-    price:1200,
-    thumbnail:"",
-    code:"ip007",
-    stock: 2,
-    id: 1
-})
-prodManager.deleteProd(2)
+

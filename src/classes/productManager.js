@@ -1,74 +1,115 @@
-import  {promises as fs}  from 'fs'
+import  {existsSync, promises as fs}  from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 export default class ProductManager {
     constructor(){
-        this.prods = []
-        this.path = "./products.json"
+        this.path = join(__dirname, "../data/products.json")
+        this.prodsExists()
         }
-
     static id = 0
-    async readProds(){
-        const data = await fs.readFile(this.path,"utf-8",(err)=>{
-            if(err){
-                console.log("error en lectura")
-            }
-
-        })
-        return JSON.parse(data)
+    async readProds(path){
+        try{
+            return JSON.parse(await fs.readFile(path,"utf-8"))
+        }
+       catch(err){
+            console.error("error en la lectura", err)
+       }     
     }
-    async getProducts(){
-        try {
-            let prods = await this.readProds()
-            return prods
-        } catch(err){
-            console.log('Error al cargar productos')
+    async prodsExists(){
+        try{
+            const exists = existsSync(this.path)
+            if(!exists){
+                await fs.writeFile(this.path,'[]','utf-8')
+                console.log(`se a creado el archivo en ${this.path}`)
+            }
         }
-    }  
-    async addProduct({tittle,description,price,thumbnail,code,stock}){
-        if( !tittle && !description && !price && !thumbnail && !code && !stock){
-            console.log("FALTAN DATOS")
+        catch(err){
+            console.error('no se pudo crear el archivo',err)
         }
-        if (!this.prods.some((p)=> p.code === code )){
-            ProductManager.id++
+        }
 
-            let newProd = {tittle,description,price,thumbnail,code,stock,id: ProductManager.id}
-            this.prods.push(newProd)
-            await fs.writeFile(this.path,JSON.stringify(this.prods),"utf-8")
-            console.log('Se agrego correctamente')
+
+    async writeProducts(path,data){
+        try{
+            await fs.writeFile(path, JSON.stringify(data), 'utf-8')
+        } catch (error){
+            console.error("error en la escritura de archivo", error)
         }
-        else{
-            console.log("Ya se encuentra el producto "+code)
+    }
+
+    async addProduct({tittle,description,price,thumbnail,code,stock}){
+        try{
+            let products = await this.readProds(this.path)
+            if( !tittle && !description && !price && !thumbnail && !code && !stock ){
+                console.log("FALTAN DATOS")
+            }
+            if (!products.some((p)=> p.code === code )){    
+
+                ProductManager.id++
+                let newProd =  {tittle,description,price,thumbnail,code,stock,id: ProductManager.id, status: true }
+                products.push(newProd)
+                await this.writeProducts(this.path,products)
+                return { data: newProd, message:" Se a agregado correctamente", status:newProd.status}
+        }
+            else{
+                return{message:`El producto ${code} ya se encuentra ` }
+        }
+        }
+        catch(err){
+            return {message:"no se a podido agregar el producto", error: err}
         }
     }
     async deleteProd (id){
-        let products = await this.readProds()
-        const filtrado = products.filter(prod => prod.id !== id)
-        await fs.writeFile(this.path,JSON.stringify(filtrado),"utf-8")
-        console.log("Se a eliminado el producto de id "+id)
+        try{
+            let products = await this.readProds(this.path)
+            let prodExists = await this.getProductById(id)
+            if (prodExists){
+                let productsFilter = products.filter((prod) => prod.id !== id)
+                await this.writeProducts(this.path,productsFilter)
+                return { status: true, message:`Se a borrado el producto del id ${id}`}
+            } 
+           
+        }
+        catch(err){
+            return { message : " No se pudo borrar el producto ", status: false, error:err  }
+        }
     }
     async getProductById (id){
-        let products = await this.readProds()
-        const result =  products.find(prod => prod.id === id )
-        if ( result ){
-            return result 
+        try{
+            let products = await this.readProds(this.path)
+            let prodId = products.find((prod)=> prod.id === id)
+            if(prodId){
+                return {data:prodId }
+            }else{
+                return {message:"El id no corresponde "}
+            }
         }
-        else{
-            console.log("No se encontro")
+        catch(err){
+            console.error("Hubo un error en obtener el producto",err)
         }
     }
     async updateProduct ({id,...producto}){
-        let products = await this.readProds()
-        await this.deleteProd(id)
-        if (products.find( prod => prod.id === id)){
-           let updateProd = [{
-            id,...producto
-           },
-            ...products
-        ]       
-        await fs.writeFile(this.path,JSON.stringify(updateProd),"utf-8")
-        console.log("Se a modificado correctamente")
-    }
-        else{
-            console.log("El producto no existe")
+        try{
+            let products = await this.readProds(this.path)
+            await this.deleteProd(id)
+            if (products.find( prod => prod.id === id)){
+                let updateProd = [{
+                    id,...producto
+                },
+                ...products
+            ]       
+            await this.writeProducts(this.path,updateProd)
+                return {status: true ,data: updateProd, message:`El producto ${id} se a modificado correctamente `}
+            }
+            else{
+                return { message:`El producto ${id} no existe `}
+            }
+        }
+        catch (err){
+            return {error: " No se pudo actualizar el producto"}
         }
     }
 }
