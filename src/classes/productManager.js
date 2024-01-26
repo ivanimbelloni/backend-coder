@@ -39,12 +39,21 @@ export default class ProductManager {
             console.error("error en la escritura de archivo", error)
         }
     }
+    async getProducts(){
+        try{
+            let products = await this.readProds(this.path)
 
+            return {message:" Se obtuvieron los productos ", data: products}
+        }
+        catch(err){
+            return {message: "Hubo un fallo al obtener los productos", error: err}
+        }
+    }
     async addProduct({tittle,description,price,thumbnail,code,stock}){
         try{
             let products = await this.readProds(this.path)
-            if( !tittle && !description && !price && !thumbnail && !code && !stock ){
-                console.log("FALTAN DATOS")
+            if( !tittle && !description && !price  && !code && !stock ){
+                return {message: " faltan datos "}
             }
             if (!products.some((p)=> p.code === code )){    
 

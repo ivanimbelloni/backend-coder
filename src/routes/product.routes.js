@@ -6,14 +6,14 @@ const prod = new ProductManager()
 
 
 routerProds.get("/",  async (req, res )=>{
-    const prods = await prod.readProds(pathProds)
+    const prods = await prod.getProducts()
     const limit = parseInt(req.query.limit)
     if(limit && limit>0){
         let prodsLimit = prods.slice(0,limit)
         res.status(200).json(prodsLimit)
     }
     else{
-        res.json(prods)
+        res.status(201).json({message: prods.message ,data: prods.data})
     }
 })
 
@@ -26,7 +26,7 @@ routerProds.get("/:id" , async (req,res)=>{
         res.send({error: "el producto no se encuentra"})
     }
     else{
-        res.json(product)
+        res.json({message: product.message, data: product.data})
     }
 })
 
@@ -35,10 +35,10 @@ routerProds.post('/', async (req,res)=>{
 
     let product = await prod.addProduct(quest)
     if( product.status ){
-        res.status(201).json(product)
+        res.status(201).json({data:product.data, message:product.message })
     }
     else{
-        res.status(400).console.error("error en el post ");
+        res.status(400).json({ message: product.message ,error:product.error})
     }
 })
 
