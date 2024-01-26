@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js",
-    "init": "node src/index.js"
+    "init": "node src/index.js",
+    "tailwind": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,11 @@
   "description": "",
   "dependencies": {
     "express": "^4.18.2",
-    "node": "^21.2.0"
+    "express-handlebars": "^7.1.2",
+    "node": "^21.2.0",
+    "socket.io": "^4.7.4"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
   }
 }

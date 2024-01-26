@@ -1,0 +1,13 @@
+<div class=" p-4 h-auto bg-teal-500 container ">
+    <h2 class=" font-bold text-center text-xxl">Productos</h2>
+    {{#each array}}
+        <div class=" m-5 bg-teal-100 text-black text-base"> 
+            <div class=" container m-auto ">
+                <p class=" font-light">Categoría: {{this.category}}</p>
+                <h5 class=" font-bold text-lg">{{this.title}}</h5>
+                <p class=" font-medium">Descripción: {{this.description}}</p>
+                <p class=" font-medium ">Precio por unidad: ${{this.price}}</p>
+            </div>
+        </div>
+    {{/each}}
+</div>
